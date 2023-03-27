@@ -1,37 +1,39 @@
-// Select all images with the class "slide-in"
-  const slideInImages = document.querySelectorAll('.slide-in');
+// Get all the images
+      const images = document.querySelectorAll("img");
 
-  // Define the function that will add the active class to the image when scrolled to
-  function handleSlideInImage(entries) {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        // Add the active class to the image
-        entry.target.classList.add('active');
-      } else {
-        // Remove the active class from the image
-        entry.target.classList.remove('active');
+      // Function to check if the image is in the viewport
+      function checkSlide(e) {
+        images.forEach((image) => {
+          const slideInAt =
+            window.scrollY + window.innerHeight - image.height / 2;
+          const imageBottom = image.offsetTop + image.height;
+          const isHalfShown = slideInAt > image.offsetTop;
+          const isNotScrolledPast = window.scrollY < imageBottom;
+
+          if (isHalfShown && isNotScrolledPast) {
+            image.classList.add("active");
+          } else {
+            image.classList.remove("active");
+          }
+        });
       }
-    });
-  }
 
-  // Use the debounce function to limit the rate at which the handleSlideInImage function is called
-  function debounce(func, wait = 20, immediate = true) {
-    let timeout;
-    return function() {
-      const context = this, args = arguments;
-      const later = function() {
-        timeout = null;
-        if (!immediate) func.apply(context, args);
-      };
-      const callNow = immediate && !timeout;
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-      if (callNow) func.apply(context, args);
-    };
-  }
+      // Debounce function to improve performance
+      function debounce(func, wait = 20, immediate = true) {
+        let timeout;
+        return function () {
+          const context = this,
+            args = arguments;
+          const later = function () {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+          };
+          const callNow = immediate && !timeout;
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+          if (callNow) func.apply(context, args);
+        };
+      }
 
-  // Create a new IntersectionObserver and pass in the handleSlideInImage function
-  const slideInObserver = new IntersectionObserver(debounce(handleSlideInImage));
-
-  // Observe all slide-in images
-  slideInImages.forEach(img => slideInObserver.observe(img));
+      // Call the checkSlide function on scroll
+      window.addEventListener("scroll", debounce(checkSlide));
